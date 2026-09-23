@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "a8921b4f-8012-4c22-9988-academiax2026",
     "name": "AcademiaX Microservices API Suite (PS035)",
-    "description": "Comprehensive Postman API Collection for AcademiaX Higher Education Enrollment & Tuition Processing Microservices (Eureka, API Gateway, Auth, Course, Enrollment, Payment).",
+    "description": "Comprehensive Postman API Collection for AcademiaX Higher Education Enrollment & Tuition Processing Microservices (Eureka, API Gateway, Auth, Course, Enrollment, Payment) with HMAC-SHA256 JWT Security.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -17,12 +17,15 @@
               "script": {
                 "exec": [
                   "var jsonData = pm.response.json();",
-                  "pm.test('Status code is 200', function () {",
+                  "pm.test('Status code is 200 OK', function () {",
                   "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('HMAC-SHA256 JWT Token generated', function () {",
+                  "    pm.expect(jsonData.token).to.be.a('string');",
                   "});",
                   "if (jsonData.token) {",
                   "    pm.environment.set('jwt_token', jsonData.token);",
-                  "    console.log('Saved JWT Token: ' + jsonData.token);",
+                  "    console.log('Saved JWT Token to Environment: ' + jsonData.token);",
                   "}"
                 ],
                 "type": "text/javascript"
@@ -43,11 +46,23 @@
               "host": ["{{gateway_url}}"],
               "path": ["api", "auth", "login"]
             },
-            "description": "Authenticate as Student (Rahul Kumar) and receive signed JWT token."
+            "description": "Authenticate as Student (Rahul Kumar) and receive signed HMAC-SHA256 JWT token."
           }
         },
         {
           "name": "POST Auth - Login Instructor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.token) pm.environment.set('jwt_token', jsonData.token);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -67,6 +82,18 @@
         },
         {
           "name": "POST Auth - Login Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.token) pm.environment.set('jwt_token', jsonData.token);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -85,7 +112,7 @@
           }
         },
         {
-          "name": "POST Auth - Verify JWT Token",
+          "name": "POST Auth - Verify HMAC-SHA256 Token",
           "request": {
             "method": "POST",
             "header": [
@@ -101,7 +128,7 @@
               "host": ["{{gateway_url}}"],
               "path": ["api", "auth", "verify"]
             },
-            "description": "Validate active JWT token signature and claims."
+            "description": "Validate active HMAC-SHA256 JWT token signature and claims."
           }
         }
       ]
@@ -136,11 +163,12 @@
           }
         },
         {
-          "name": "POST Courses - Create New Course",
+          "name": "POST Courses - Create New Course (Protected JWT)",
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
             ],
             "body": {
               "mode": "raw",
@@ -151,15 +179,16 @@
               "host": ["{{gateway_url}}"],
               "path": ["api", "courses"]
             },
-            "description": "Instructor endpoint to publish a new course offering."
+            "description": "Instructor endpoint to publish a new course offering (Protected by API Gateway JWT Interceptor)."
           }
         },
         {
-          "name": "PUT Courses - Update Seat Capacity (CS401)",
+          "name": "PUT Courses - Update Seat Capacity (Protected JWT)",
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
             ],
             "body": {
               "mode": "raw",
@@ -195,7 +224,7 @@
               "host": ["{{gateway_url}}"],
               "path": ["api", "enrollments"]
             },
-            "description": "Execute enrollment pipeline with capacity, deadline and schedule checks."
+            "description": "Execute enrollment pipeline with capacity, deadline and schedule checks (Protected by Bearer JWT)."
           }
         },
         {
@@ -203,7 +232,8 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
             ],
             "body": {
               "mode": "raw",
@@ -222,7 +252,8 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
             ],
             "body": {
               "mode": "raw",
@@ -259,7 +290,8 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
             ],
             "body": {
               "mode": "raw",
@@ -270,7 +302,7 @@
               "host": ["{{gateway_url}}"],
               "path": ["api", "payments", "process"]
             },
-            "description": "Execute mock tuition payment processing and update ledger."
+            "description": "Execute mock tuition payment processing and update ledger (Protected by Bearer JWT)."
           }
         },
         {
