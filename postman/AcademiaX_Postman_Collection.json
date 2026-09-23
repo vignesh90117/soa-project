@@ -1,0 +1,336 @@
+{
+  "info": {
+    "_postman_id": "a8921b4f-8012-4c22-9988-academiax2026",
+    "name": "AcademiaX Microservices API Suite (PS035)",
+    "description": "Comprehensive Postman API Collection for AcademiaX Higher Education Enrollment & Tuition Processing Microservices (Eureka, API Gateway, Auth, Course, Enrollment, Payment).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "🔐 01 - Auth Service (JWT)",
+      "item": [
+        {
+          "name": "POST Auth - Login Student",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "if (jsonData.token) {",
+                  "    pm.environment.set('jwt_token', jsonData.token);",
+                  "    console.log('Saved JWT Token: ' + jsonData.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"student@academiax.demo\",\n  \"role\": \"student\"\n}"
+            },
+            "url": {
+              "raw": "{{gateway_url}}/api/auth/login",
+              "host": ["{{gateway_url}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Authenticate as Student (Rahul Kumar) and receive signed JWT token."
+          }
+        },
+        {
+          "name": "POST Auth - Login Instructor",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"instructor@academiax.demo\",\n  \"role\": \"instructor\"\n}"
+            },
+            "url": {
+              "raw": "{{gateway_url}}/api/auth/login",
+              "host": ["{{gateway_url}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Authenticate as Instructor (Dr. A. K. Rao)."
+          }
+        },
+        {
+          "name": "POST Auth - Login Admin",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@academiax.demo\",\n  \"role\": \"admin\"\n}"
+            },
+            "url": {
+              "raw": "{{gateway_url}}/api/auth/login",
+              "host": ["{{gateway_url}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Authenticate as System Administrator (Marcus)."
+          }
+        },
+        {
+          "name": "POST Auth - Verify JWT Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{jwt_token}}\"\n}"
+            },
+            "url": {
+              "raw": "{{gateway_url}}/api/auth/verify",
+              "host": ["{{gateway_url}}"],
+              "path": ["api", "auth", "verify"]
+            },
+            "description": "Validate active JWT token signature and claims."
+          }
+        }
+      ]
+    },
+    {
+      "name": "📚 02 - Course Service",
+      "item": [
+        {
+          "name": "GET Courses - List All Offerings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{gateway_url}}/api/courses",
+              "host": ["{{gateway_url}}"],
+              "path": ["api", "courses"]
+            },
+            "description": "Fetch list of all courses with seat capacity occupancy metrics."
+          }
+        },
+        {
+          "name": "GET Courses - Get Details (CS401)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{gateway_url}}/api/courses/CS401",
+              "host": ["{{gateway_url}}"],
+              "path": ["api", "courses", "CS401"]
+            },
+            "description": "Retrieve metadata, prerequisites & schedule for CS401 Advanced Data Structures."
+          }
+        },
+        {
+          "name": "POST Courses - Create New Course",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"CS505\",\n  \"title\": \"Distributed Systems Engineering\",\n  \"department\": \"Computer Science\",\n  \"credits\": 4,\n  \"instructor\": \"Dr. A. K. Rao\",\n  \"capacity\": 40,\n  \"scheduleDays\": [\"Tue\", \"Thu\"],\n  \"scheduleTime\": \"11:00 - 12:30\"\n}"
+            },
+            "url": {
+              "raw": "{{gateway_url}}/api/courses",
+              "host": ["{{gateway_url}}"],
+              "path": ["api", "courses"]
+            },
+            "description": "Instructor endpoint to publish a new course offering."
+          }
+        },
+        {
+          "name": "PUT Courses - Update Seat Capacity (CS401)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"capacity\": 50\n}"
+            },
+            "url": {
+              "raw": "{{gateway_url}}/api/courses/CS401/capacity",
+              "host": ["{{gateway_url}}"],
+              "path": ["api", "courses", "CS401", "capacity"]
+            },
+            "description": "Instructor endpoint to increase course seat capacity threshold."
+          }
+        }
+      ]
+    },
+    {
+      "name": "🎓 03 - Enrollment Service",
+      "item": [
+        {
+          "name": "POST Enrollment - Submit Valid Request (CS401)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"studentId\": \"{{student_id}}\",\n  \"courseId\": \"CS401\"\n}"
+            },
+            "url": {
+              "raw": "{{gateway_url}}/api/enrollments",
+              "host": ["{{gateway_url}}"],
+              "path": ["api", "enrollments"]
+            },
+            "description": "Execute enrollment pipeline with capacity, deadline and schedule checks."
+          }
+        },
+        {
+          "name": "POST Enrollment - Test Schedule Conflict Block (CS405)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"studentId\": \"{{student_id}}\",\n  \"courseId\": \"CS405\"\n}"
+            },
+            "url": {
+              "raw": "{{gateway_url}}/api/enrollments",
+              "host": ["{{gateway_url}}"],
+              "path": ["api", "enrollments"]
+            },
+            "description": "Test business validation rule: Blocks enrollment due to schedule overlap with CS305."
+          }
+        },
+        {
+          "name": "POST Enrollment - Test Deadline Expired Block (MBA210)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"studentId\": \"{{student_id}}\",\n  \"courseId\": \"MBA210\"\n}"
+            },
+            "url": {
+              "raw": "{{gateway_url}}/api/enrollments",
+              "host": ["{{gateway_url}}"],
+              "path": ["api", "enrollments"]
+            },
+            "description": "Test business validation rule: Blocks enrollment because deadline expired on 25 Aug 2026."
+          }
+        },
+        {
+          "name": "GET Enrollment - Get Student Enrollments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{gateway_url}}/api/enrollments/student/{{student_id}}",
+              "host": ["{{gateway_url}}"],
+              "path": ["api", "enrollments", "student", "{{student_id}}"]
+            },
+            "description": "Fetch all registered course enrollments for STU-1024."
+          }
+        }
+      ]
+    },
+    {
+      "name": "💳 04 - Payment Service",
+      "item": [
+        {
+          "name": "POST Payment - Process Tuition Payment (₹35,000)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"studentId\": \"{{student_id}}\",\n  \"amount\": 35000,\n  \"method\": \"UPI (Google Pay)\"\n}"
+            },
+            "url": {
+              "raw": "{{gateway_url}}/api/payments/process",
+              "host": ["{{gateway_url}}"],
+              "path": ["api", "payments", "process"]
+            },
+            "description": "Execute mock tuition payment processing and update ledger."
+          }
+        },
+        {
+          "name": "GET Payment - Get Student Statement",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{gateway_url}}/api/payments/statement/{{student_id}}",
+              "host": ["{{gateway_url}}"],
+              "path": ["api", "payments", "statement", "{{student_id}}"]
+            },
+            "description": "Fetch itemized fee statement, paid balance, and pending balance."
+          }
+        },
+        {
+          "name": "GET Payment - Get Printable Receipt",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{gateway_url}}/api/payments/receipt/TXN-20260824-10492",
+              "host": ["{{gateway_url}}"],
+              "path": ["api", "payments", "receipt", "TXN-20260824-10492"]
+            },
+            "description": "Retrieve official receipt data for printable transaction verification."
+          }
+        }
+      ]
+    },
+    {
+      "name": "🌐 05 - Eureka Service Registry",
+      "item": [
+        {
+          "name": "GET Eureka - Query Registered Apps",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{eureka_url}}/eureka/apps",
+              "host": ["{{eureka_url}}"],
+              "path": ["eureka", "apps"]
+            },
+            "description": "Query Eureka Discovery Server for registered microservices applications."
+          }
+        },
+        {
+          "name": "GET Eureka - Query Cluster Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{eureka_url}}/eureka/health",
+              "host": ["{{eureka_url}}"],
+              "path": ["eureka", "health"]
+            },
+            "description": "Check status & total registered application count on Eureka Server."
+          }
+        }
+      ]
+    }
+  ]
+}
